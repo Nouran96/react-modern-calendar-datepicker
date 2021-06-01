@@ -22,6 +22,8 @@ const DatePicker = ({
   calendarRangeEndClassName,
   calendarPopperPosition,
   disabledDays,
+  disabledWeekDays,
+  enabledDays,
   onDisabledDayError,
   colorPrimary,
   colorPrimaryLight,
@@ -59,7 +61,7 @@ const DatePicker = ({
     if (shouldCloseCalendar) inputElement.current.blur();
   }, [value, isCalendarOpen]);
 
-  const handleBlur = e => {
+  const handleBlur = (e) => {
     e.persist();
     if (!isCalendarOpen) return;
     const isInnerElementFocused = calendarContainerElement.current.contains(e.relatedTarget);
@@ -108,7 +110,7 @@ const DatePicker = ({
     }
   }, [isCalendarOpen]);
 
-  const handleCalendarChange = newValue => {
+  const handleCalendarChange = (newValue) => {
     const valueType = getValueType(value);
     onChange(newValue);
     if (valueType === TYPE_SINGLE_DATE) setCalendarVisiblity(false);
@@ -173,6 +175,8 @@ const DatePicker = ({
               calendarRangeBetweenClassName={calendarRangeBetweenClassName}
               calendarRangeEndClassName={calendarRangeEndClassName}
               disabledDays={disabledDays}
+              disabledWeekDays={disabledWeekDays}
+              enabledDays={enabledDays}
               colorPrimary={colorPrimary}
               colorPrimaryLight={colorPrimaryLight}
               slideAnimationDuration={slideAnimationDuration}

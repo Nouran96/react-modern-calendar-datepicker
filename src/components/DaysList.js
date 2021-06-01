@@ -17,6 +17,8 @@ const DaysList = ({
   monthChangeDirection,
   onSlideChange,
   disabledDays,
+  disabledWeekDays,
+  enabledDays,
   onDisabledDayError,
   minimumDate,
   maximumDate,
@@ -52,7 +54,7 @@ const DaysList = ({
     });
   }, [monthChangeDirection]);
 
-  const getDayRangeValue = day => {
+  const getDayRangeValue = (day) => {
     const clonedDayRange = deepCloneObject(value);
     const dayRangeValue =
       clonedDayRange.from && clonedDayRange.to ? { from: null, to: null } : clonedDayRange;
@@ -66,7 +68,7 @@ const DaysList = ({
       dayRangeValue.to = from;
     }
 
-    const checkIncludingDisabledDay = disabledDay => {
+    const checkIncludingDisabledDay = (disabledDay) => {
       return checkDayInDayRange({
         day: disabledDay,
         from: dayRangeValue.from,
@@ -82,14 +84,14 @@ const DaysList = ({
     return dayRangeValue;
   };
 
-  const getMultiDateValue = day => {
-    const isAlreadyExisting = value.some(valueDay => isSameDay(valueDay, day));
+  const getMultiDateValue = (day) => {
+    const isAlreadyExisting = value.some((valueDay) => isSameDay(valueDay, day));
     const addedToValue = [...value, day];
-    const removedFromValue = value.filter(valueDay => !isSameDay(valueDay, day));
+    const removedFromValue = value.filter((valueDay) => !isSameDay(valueDay, day));
     return isAlreadyExisting ? removedFromValue : addedToValue;
   };
 
-  const handleDayClick = day => {
+  const handleDayClick = (day) => {
     const getNewValue = () => {
       const valueType = getValueType(value);
       switch (valueType) {
@@ -105,13 +107,13 @@ const DaysList = ({
     onChange(newValue);
   };
 
-  const isSingleDateSelected = day => {
+  const isSingleDateSelected = (day) => {
     const valueType = getValueType(value);
     if (valueType === TYPE_SINGLE_DATE) return isSameDay(day, value);
-    if (valueType === TYPE_MUTLI_DATE) return value.some(valueDay => isSameDay(valueDay, day));
+    if (valueType === TYPE_MUTLI_DATE) return value.some((valueDay) => isSameDay(valueDay, day));
   };
 
-  const getDayStatus = dayItem => {
+  const getDayStatus = (dayItem) => {
     const isToday = isSameDay(dayItem, today);
     const isSelected = isSingleDateSelected(dayItem);
     const { from: startingDay, to: endingDay } = value || {};
@@ -121,7 +123,7 @@ const DaysList = ({
     return { isToday, isSelected, isStartingDayRange, isEndingDayRange, isWithinRange };
   };
 
-  const getDayClassNames = dayItem => {
+  const getDayClassNames = (dayItem) => {
     const {
       isToday,
       isSelected,
@@ -129,7 +131,7 @@ const DaysList = ({
       isEndingDayRange,
       isWithinRange,
     } = getDayStatus(dayItem);
-    const customDayItemClassName = customDaysClassName.find(day => isSameDay(dayItem, day));
+    const customDayItemClassName = customDaysClassName.find((day) => isSameDay(dayItem, day));
     const classNames = ''
       .concat(isToday && !isSelected ? ` -today ${calendarTodayClassName}` : '')
       .concat(!dayItem.isStandard ? ' -blank' : '')
@@ -143,10 +145,10 @@ const DaysList = ({
     return classNames;
   };
 
-  const getViewMonthDays = date => {
+  const getViewMonthDays = (date) => {
     // to match month starting date with the correct weekday label
     const prependingBlankDays = createUniqueRange(getMonthFirstWeekday(date), 'starting-blank');
-    const standardDays = createUniqueRange(getMonthLength(date)).map(day => ({
+    const standardDays = createUniqueRange(getMonthLength(date)).map((day) => ({
       ...day,
       isStandard: true,
       month: date.month,
@@ -176,11 +178,18 @@ const DaysList = ({
 
   const renderEachWeekDays = ({ id, value: day, month, year, isStandard }, index) => {
     const dayItem = { day, month, year };
-    const isInDisabledDaysRange = disabledDays.some(disabledDay => isSameDay(dayItem, disabledDay));
+    const isInDisabledDaysRange = disabledDays.some((disabledDay) =>
+      isSameDay(dayItem, disabledDay),
+    );
+    const isInDisabledWeekDays =
+      disabledWeekDays && disabledWeekDays.some((disabledWeekDay) => disabledWeekDay === index);
+    const isInForcelyEnabledDays = enabledDays.some((enabledDay) => isSameDay(dayItem, enabledDay));
     const isBeforeMinimumDate = isBeforeDate(dayItem, minimumDate);
     const isAfterMaximumDate = isBeforeDate(maximumDate, dayItem);
     const isNotInValidRange = isStandard && (isBeforeMinimumDate || isAfterMaximumDate);
-    const isDisabled = isInDisabledDaysRange || isNotInValidRange;
+    const isDisabled =
+      (isInDisabledDaysRange || isNotInValidRange || isInDisabledWeekDays) &&
+      !isInForcelyEnabledDays;
     const isWeekend = weekDaysList.some(
       (weekDayItem, weekDayItemIndex) => weekDayItem.isWeekend && weekDayItemIndex === index,
     );
@@ -219,7 +228,7 @@ const DaysList = ({
     );
   };
 
-  const renderMonthDays = isInitialActiveChild => {
+  const renderMonthDays = (isInitialActiveChild) => {
     const date = getSlideDate({
       activeDate,
       isInitialActiveChild,
@@ -227,7 +236,7 @@ const DaysList = ({
       parent: calendarSectionWrapper.current,
     });
     const allDays = getViewMonthDays(date);
-    const renderSingleWeekRow = weekRowIndex => {
+    const renderSingleWeekRow = (weekRowIndex) => {
       const eachWeekDays = allDays
         .slice(weekRowIndex * 7, weekRowIndex * 7 + 7)
         .map(renderEachWeekDays);
@@ -240,7 +249,7 @@ const DaysList = ({
     return Array.from(Array(6).keys()).map(renderSingleWeekRow);
   };
 
-  const handleKeyDown = e => {
+  const handleKeyDown = (e) => {
     handleKeyboardNavigation(e, { allowVerticalArrows: true });
   };
 
@@ -253,7 +262,7 @@ const DaysList = ({
       onKeyDown={handleKeyDown}
     >
       <div
-        onAnimationEnd={e => {
+        onAnimationEnd={(e) => {
           handleSlideAnimationEnd(e);
           onSlideChange();
         }}
@@ -263,7 +272,7 @@ const DaysList = ({
         {renderMonthDays(true)}
       </div>
       <div
-        onAnimationEnd={e => {
+        onAnimationEnd={(e) => {
           handleSlideAnimationEnd(e);
           onSlideChange();
         }}
@@ -280,6 +289,7 @@ DaysList.defaultProps = {
   onChange: () => {},
   onDisabledDayError: () => {},
   disabledDays: [],
+  enabledDays: [],
   calendarTodayClassName: '',
   calendarSelectedDayClassName: '',
   calendarRangeStartClassName: '',

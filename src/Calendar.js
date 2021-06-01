@@ -17,6 +17,8 @@ const Calendar = ({
   calendarRangeBetweenClassName,
   calendarRangeEndClassName,
   disabledDays,
+  disabledWeekDays,
+  enabledDays,
   colorPrimary,
   colorPrimaryLight,
   slideAnimationDuration,
@@ -60,7 +62,7 @@ const Calendar = ({
   const { weekDays: weekDaysList, isRtl } = useLocaleLanguage(locale);
   const today = getToday();
 
-  const createStateToggler = property => () => {
+  const createStateToggler = (property) => () => {
     setMainState({ ...mainState, [property]: !mainState[property] });
   };
 
@@ -79,13 +81,13 @@ const Calendar = ({
     ? shallowClone(mainState.activeDate)
     : getComputedActiveDate();
 
-  const weekdays = weekDaysList.map(weekDay => (
+  const weekdays = weekDaysList.map((weekDay) => (
     <abbr key={weekDay.name} title={weekDay.name} className="Calendar__weekDay">
       {weekDay.short}
     </abbr>
   ));
 
-  const handleMonthChange = direction => {
+  const handleMonthChange = (direction) => {
     setMainState({
       ...mainState,
       monthChangeDirection: direction,
@@ -100,7 +102,7 @@ const Calendar = ({
     });
   };
 
-  const selectMonth = newMonthNumber => {
+  const selectMonth = (newMonthNumber) => {
     setMainState({
       ...mainState,
       activeDate: { ...activeDate, month: newMonthNumber },
@@ -108,7 +110,7 @@ const Calendar = ({
     });
   };
 
-  const selectYear = year => {
+  const selectYear = (year) => {
     setMainState({
       ...mainState,
       activeDate: { ...activeDate, year },
@@ -168,6 +170,8 @@ const Calendar = ({
         monthChangeDirection={mainState.monthChangeDirection}
         onSlideChange={updateDate}
         disabledDays={disabledDays}
+        disabledWeekDays={disabledWeekDays}
+        enabledDays={enabledDays}
         onDisabledDayError={onDisabledDayError}
         minimumDate={minimumDate}
         maximumDate={maximumDate}
